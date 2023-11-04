@@ -71,6 +71,7 @@ class ConversationAnalyzer:
                 total_time_talking += float(sent["words"][-1]["end_timestamp"]) - float(sent["words"][0]["start_timestamp"])
                 total_words += len(sent["words"])
 
+        # 2. speaker words per minute
         words_per_minute = (total_words / total_time_talking) * 60
 
         sentiment_scores = []
@@ -79,13 +80,12 @@ class ConversationAnalyzer:
         sentiment_score = np.average(sentiment_scores)
         
 
-        # 2. average speaker words per minute
-        
-        # 2. llm feedback
+        # 3. llm feedback
         full_conversation = self.stitch_convo()
         prompt = f"Based on the preceding conversation, does {speaker} have effective communication as a soft skill? Additionally, what types of soft skills does {speaker} possess?"
         model_input = [{"role": "user", "content": full_conversation}]
         feedback = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=model_input)
+
         return {"sentiment_score": sentiment_score,
                 "words_per_minute": words_per_minute,
                 "model_feedback": feedback.choices[0].message.content}
