@@ -1,9 +1,8 @@
-import time  # to simulate a real time data, time loop
-
 import numpy as np  # np mean, np random
 import pandas as pd  # read csv, df manipulation
 import plotly.express as px  # interactive charts
 import streamlit as st  # 🎈 data web app development
+import os
 
 from analyze_conversation import *
 
@@ -18,8 +17,9 @@ st.set_page_config(
 # dashboard title
 st.title("Perspect Conversational Performance Dashboard")
 
-# uploaded_file = st.file_uploader("Choose a file")
-uploaded_file = open("meeting-transcripts/all_hands.json")
+files = os.listdir("../meeting-transcripts")
+chosen_file = st.selectbox("Select a meeting transcript file to analyze", list(files))
+uploaded_file = open(f"../meeting-transcripts/{chosen_file}")
 if uploaded_file is not None:
     
     conversation = ConversationAnalyzer(uploaded_file)
@@ -48,7 +48,7 @@ if uploaded_file is not None:
 
     kpi4.metric(
         label = "Average Sentence Length",
-        value=f"{round(kpi_dict['Average Sentence Length'], 2)} seconds"
+        value=f"{round(kpi_dict['Average Sentence Length'], 2)} words"
     )
 
     st.markdown("### Break down of speaker time")
@@ -60,9 +60,24 @@ if uploaded_file is not None:
     st.plotly_chart(fig)
 
     # top-level filters
-    job_filter = st.selectbox("Select the Speaker", list(conversation.speakers))
+    speaker_filter = st.selectbox("Select the Speaker", list(conversation.speakers))
 
+    speaker_kpi = conversation.get_speaker_kpi(speaker_filter)
 
+    kpi1, kpi2 = st.columns(2)
+
+    kpi1.metric(
+        label = "Words Per Minute",
+        value = f"{round(speaker_kpi['words_per_minute'], 2)} words"
+    )
+
+    kpi2.metric(
+        label = "User Sentiment Score",
+        value = f"{round(speaker_kpi['sentiment_score'], 2)}"
+    )
+
+    st.markdown("### AI Powered Speaker Feedback")
+    st.markdown(speaker_kpi["model_feedback"])
     # with st.sidebar:
     #     add_radio = st.radio(
     #         "Choose a shipping method",
