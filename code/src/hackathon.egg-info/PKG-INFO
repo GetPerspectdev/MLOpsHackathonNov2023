@@ -20,28 +20,3 @@ Provides-Extra: static-code-qa
 Requires-Dist: pre-commit; extra == "static-code-qa"
 Provides-Extra: dev
 Requires-Dist: hackathon[release,static-code-qa,test]; extra == "dev"
-
-# hackathon
-
-## Quick start
-
-```bash
-pip install hackathon
-```
-
-```python
-from analysis import ...
-```
-
-## Contributing
-
-```bash
-# clone the repo
-git clone https://github.com/phitoduck/hackathon.git
-
-# install the dev dependencies
-make install
-
-# run the tests
-make test
-```
