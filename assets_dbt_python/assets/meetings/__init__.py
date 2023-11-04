@@ -8,10 +8,10 @@ from assets_dbt_python.utils import random_data
 
 
 @asset(
-    compute_kind="S3",
+    compute_kind="Pandas",
 )
 def meetings(context) -> pd.DataFrame:
-    """A table containing all users data."""
+    """Prepare transcript data for processing."""
     
     meetings = pd.DataFrame()
     project_dir = os.path.abspath(os.path.join(os.getcwd(), ''))
@@ -48,7 +48,7 @@ def meetings(context) -> pd.DataFrame:
     compute_kind="HuggingFace",
 )
 def open_ended_questions(context, meetings) -> pd.DataFrame:
-    """A table containing all users data."""
+    """Classifier for whether questions are open-ended."""
     
     from transformers import pipeline
     classifier = pipeline("sentiment-analysis", model="arl949/bert-base-cased-finetuned-open-ended-questions-english")
@@ -58,7 +58,7 @@ def open_ended_questions(context, meetings) -> pd.DataFrame:
     questions = [text if '?' in text else '' for text in texts ]
 
     # Currently hitting some max length issues with the model, we can only take 512 words at a time
-    classifications = classifier(questions)
+    classifications = classifier(questions, truncation=True, max_length=512, padding=True)
 
     context.add_output_metadata(
         {
@@ -72,7 +72,7 @@ def open_ended_questions(context, meetings) -> pd.DataFrame:
     compute_kind="VaderSentiment",
 )
 def affirmations(context, meetings) -> list:
-    """A table containing all users data."""
+    """Sentiment analysis of meeting contributions."""
     
     from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
     analyzer = SentimentIntensityAnalyzer()
@@ -93,7 +93,7 @@ def affirmations(context, meetings) -> list:
     compute_kind="SentenceTransformers",
 )
 def reflective_listening(context, meetings) -> list:
-    """A table containing all users data."""
+    """Semantic similarity for listening and summary"""
     
     from sentence_transformers import SentenceTransformer, util
     model = SentenceTransformer('all-MiniLM-L6-v2')
@@ -121,3 +121,31 @@ def reflective_listening(context, meetings) -> list:
         }
     )
     return cosine_scores
+
+@asset(
+    compute_kind="Pandas",
+)
+def motivation_interviewing_scores(context, meetings, open_ended_questions, affirmations, reflective_listening) -> pd.DataFrame:
+    """Bring together the metrics for analytics."""
+    
+    # Open ended questions
+    meetings['open_ended'] = open_ended_questions['score']
+
+    # Take affirmations as a list of dicts and convert to a dataframe with the keys as columns
+    affirmations = pd.DataFrame(affirmations)
+    # add affirmations columns to meetings
+    meetings['affirmations_neg'] = affirmations['neg']
+    meetings['affirmations_neu'] = affirmations['neu']
+    meetings['affirmations_pos'] = affirmations['pos']
+    meetings['affirmations_compound'] = affirmations['compound']
+
+    meetings['reflective_listening'] = reflective_listening
+
+    meetings.to_csv('meetings.csv', index=False)
+        
+    context.add_output_metadata(
+        {
+            "preview": MetadataValue.md(meetings.head().to_markdown()),
+        }
+    )
+    return meetings
