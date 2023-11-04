@@ -78,8 +78,3 @@ if uploaded_file is not None:
 
     st.markdown("### AI Powered Speaker Feedback")
     st.markdown(speaker_kpi["model_feedback"])
-    # with st.sidebar:
-    #     add_radio = st.radio(
-    #         "Choose a shipping method",
-    #         ("Standard (5-15 days)", "Express (2-5 days)")
-    #     )
