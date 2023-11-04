@@ -7,21 +7,21 @@ from dagster import (
     load_assets_from_package_module,
 )
 
-from .assets import raw_data
+from .assets import meetings
 
-raw_data_assets = load_assets_from_package_module(
-    raw_data,
-    group_name="raw_data",
-    # all of these assets live in the duckdb database, under the schema raw_data
-    key_prefix=["raw_data"],
+meetings_assets = load_assets_from_package_module(
+    meetings,
+    group_name="meetings",
+    # all of these assets live in the duckdb database, under the schema meetings
+    key_prefix=["meetings"],
 )
 
 # define jobs as selections over the larger graph
-everything_job = define_asset_job("everything_everywhere_job", selection="*")
+run_all_job = define_asset_job("run_all_job", selection="*")
 
 defs = Definitions(
-    assets=[*raw_data_assets],
+    assets=[*meetings_assets],
     schedules=[
-        ScheduleDefinition(job=everything_job, cron_schedule="@daily"),
+        ScheduleDefinition(job=run_all_job, cron_schedule="@daily"),
     ],
 )
