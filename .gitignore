@@ -1,0 +1,6 @@
+venv/
+data/meeting-transcripts/
+data/questions/
+meetings.csv
+.env
+**/__pycache__/
