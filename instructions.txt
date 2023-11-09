@@ -1,0 +1,15 @@
+1. See the instructions here to create an Open AI API key https://platform.openai.com/docs/api-reference/introduction
+Once this is done paste your key into line 7 of app/analyze_conversation.py 
+
+2. Install required packages:
+    plotly
+    openai
+    streamlit
+    numpy
+    vaderSentiment
+    pandas
+
+3. run the app by executing the following command from the home directory
+
+streamlit run app/app.py
+
