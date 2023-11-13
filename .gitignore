@@ -1,3 +1,8 @@
+meeting-transcripts/*
+.idea/*
+.DS_Store
+.python-version
+
 # Created by https://www.toptal.com/developers/gitignore/api/macos,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,node
 
@@ -181,4 +186,3 @@ data/questions/
 meetings.csv
 .env
 **/__pycache__/
-
